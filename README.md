@@ -1,6 +1,6 @@
 # A-MCTS
 
-Decentralized Multi-Agent Planning With Attrition (IEEE Transactions on Mobile Computing)
+Survive and Thrive: Decentralized Multi-Agent Coordination under Attrition Risks(IEEE Transactions on Mobile Computing)
 
 This project contains the source code for the environment constructor, planning algorithms, and simulations used for the IEEE Transactions on Mobile Computing paper listed above, implemented in the Python programming language. The repository contains several folders:
 

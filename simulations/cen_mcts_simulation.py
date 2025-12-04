@@ -52,6 +52,7 @@ if __name__ == '__main__':
     n_agents = 20                                     # number of agents.
     n_rewards = 200                                   # number of rewards.
     attrition_intensity = 0.5                         # proportion of agents fail.
+    alpha = 0                                         # weight for revisited counts.
 
     # Change parameters from keyboard.
     while len(args.params) > 0:
@@ -70,6 +71,8 @@ if __name__ == '__main__':
             attrition_intensity = float(param_value)
         elif param_name == "comp":
             N_components = int(param_value)
+        elif param_name == "alpha":
+            alpha = float(param_value)
 
     if args.save:
         if args.folder != None:
@@ -89,7 +92,7 @@ if __name__ == '__main__':
     rng =  np.random.default_rng(12345)
 
     # Parse the motion graph files.
-    G = Graph(xL, xH, yL, yH, reward_radius, obsMask)
+    G = Graph(xL, xH, yL, yH, reward_radius, alpha, obsMask)
     G.add_node(agents[0], agents[1])
     G, locs = import_oil_graph(G, n_rewards)
 
@@ -125,7 +128,7 @@ if __name__ == '__main__':
         for idx in range(n_agents):
             if idx not in attrition_idx:
                 final_paths[idx] = robot.tree.data.at[0, 'best_rollout_path'][idx]
-        score = sum(G.evaluate_traj_reward(final_paths))/len(rewards)
+        score = G.evaluate_traj_reward(final_paths)/len(rewards)
         if args.verbose:
             for path in final_paths.values():
                 print(path)

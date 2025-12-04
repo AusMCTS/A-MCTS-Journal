@@ -58,6 +58,7 @@ if __name__ == '__main__':
     n_agents = 20                                     # number of agents.
     n_rewards = 200                                   # number of rewards.
     attrition_intensity = 0.5                         # proportion of agents fail.
+    alpha = 0                                         # weight for revisited counts.
 
     # A-MCTS.
     msg_threshold = 0
@@ -81,6 +82,8 @@ if __name__ == '__main__':
             N_components = int(param_value)
         elif param_name == "msg":
             msg_threshold = int(param_value)
+        elif param_name == "alpha":
+            alpha = float(param_value)
 
     if args.save:
         if args.folder != None:
@@ -111,7 +114,7 @@ if __name__ == '__main__':
     rng =  np.random.default_rng(12345)
 
     # Parse the motion graph files.
-    G = Graph(xL, xH, yL, yH, reward_radius, obsMask)
+    G = Graph(xL, xH, yL, yH, reward_radius, alpha, obsMask)
     G.add_node(agents[0], agents[1])
     G, locs = import_oil_graph(G, n_rewards)
 
@@ -168,7 +171,7 @@ if __name__ == '__main__':
         for idx in shared_info.joint_path.keys():
             if idx not in attrition_idx:
                 final_paths[idx] = shared_info.joint_path[idx]
-        score = sum(G.evaluate_traj_reward(final_paths))/len(rewards)
+        score = G.evaluate_traj_reward(final_paths)/len(rewards)
         if args.verbose:
             for path in final_paths.values():
                 print(path)

@@ -7,7 +7,7 @@ Author: Nhat Nguyen (School of Computer Science - University of Adelaide)
 
 from matplotlib import pyplot as plt
 from random import randint
-from envs.prm import minDistance, line_circle_intersection
+from envs.prm import minDistance
 import numpy as np
 
 
@@ -20,7 +20,7 @@ def get_colour_code(n_agents):
 
 
 class Graph:
-    def __init__(self, xL, xH, yL, yH, radius, obsMask=None):
+    def __init__(self, xL, xH, yL, yH, radius, alpha:float=0, obsMask=None):
         self.xL = xL
         self.xH = xH
         self.yL = yL
@@ -35,6 +35,7 @@ class Graph:
         self.edges_list = list()
         self.rewards = dict()       # Edges' rewards mask.
         self.node_counter = 0
+        self.alpha = alpha          # Weight for revisited counts.
 
     def add_node(self, x_coor, y_coor):
         self.nodes[self.node_counter] = np.array([x_coor, y_coor])
@@ -65,24 +66,6 @@ class Graph:
                     if np.all(~np.isnan(reward)):
                         minDist = minDistance(self.nodes[i], self.nodes[j], reward)
                         self.rewards[i][j][k] = (minDist <= self.radius)
-
-    def add_trans_bits(self, rewards, velocity:float, trans_rate:float, packet_size:int):
-        '''Calculate the number of transmittable bits traversing each edge.'''
-        for i in self.edges.keys():
-            for j in self.edges[i].keys():
-                for k, reward in enumerate(rewards):
-                    if np.all(~np.isnan(reward)):
-                        # Distance from sensor to edge.
-                        minDist = minDistance(self.nodes[i], self.nodes[j], reward)
-                        # If edge cross the transmission region.
-                        if minDist <= self.radius:
-                            # Length of the crossover path.
-                            path_length = line_circle_intersection(self.nodes[i][0], self.nodes[i][1], self.nodes[j][0], self.nodes[j][1], reward[0], reward[1], self.radius)
-                            # Traversal time of the crossover.
-                            traversal_time = path_length / velocity
-                            # Number of transmittable bits.
-                            transmitted_bits = np.floor(trans_rate * traversal_time)
-                            self.rewards[i][j][k] = min(transmitted_bits, packet_size)
 
     def find_edge(self, ref):
         idx = []
@@ -132,26 +115,23 @@ class Graph:
                     cost += self.evaluate_edge_cost(edge_history[i])
         return cost
 
-    def evaluate_traj_reward(self, edge_history, packet_size:int=1):
+    def evaluate_traj_reward(self, edge_history):
         # Get reward of the whole trajectories.
         reward = [0]
         if type(edge_history) is dict:
-            reward_per_agent = dict()
             for key in edge_history.keys():
                 if len(edge_history[key]) > 0:
-                    reward_per_agent[key] = [0]
                     for i in range(len(edge_history[key])):
                         if ~np.isnan(edge_history[key][i]):
-                            reward_per_agent[key] += self.evaluate_edge_reward(edge_history[key][i])
-                    reward_per_agent[key] = (reward_per_agent[key] >= packet_size)
-                    reward |= reward_per_agent[key]
+                            reward += self.evaluate_edge_reward(edge_history[key][i])
         else:
             for i in range(len(edge_history)-1):
                 if ~np.isnan(edge_history[i]):
                     reward += self.evaluate_edge_reward(edge_history[i])
-            reward = (reward >= packet_size)
-
-        return reward
+        utility = 0
+        for i in range(len(reward)):
+            utility += 1 - np.power(self.alpha, reward[i])
+        return utility
 
     def draw_nodes(self):
         # Initialise the plot.
@@ -322,4 +302,3 @@ class Graph:
             fig.savefig("../Data/gif-{}/{}.png".format(prefix, title))
         else:
             plt.pause(0.01)
-

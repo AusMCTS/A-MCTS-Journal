@@ -8,7 +8,7 @@ This project contains the source code for the environment constructor, planning 
 - `envs`: graph constructor using PRM algorithm,
 - `agent`: generic agent classes implementation, can be extended to other applications:
     - `agents/Base_Agent`: abstract class implementation for decentralised MCTS,
-    - `agents/DecMCTS_Agent`, `agents/SwMCTS_Agent`, `agents/AMCTS_Agent`: abstract classes implementation for Dec-MCTS, SW-MCTS, and A-MCTS,
+    - `agents/DecMCTS_Agent`, `agents/AMCTS_Agent`: abstract classes implementation for Dec-MCTS and A-MCTS,
     - `agents/InfoGathering_Agent`: agent classes for information gathering domain,
     - `agents/Attrition_Agent`: base agent class under attrition risks.
 

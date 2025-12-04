@@ -144,83 +144,6 @@ def import_graph(G:Graph, dir:str):
     return G, agents, rewards, nodes, n_agents, n_nodes, n_rewards
 
 
-def modify_graph_rewards(G:Graph, anchored_latlongs, rewards, n_rewards:int, change_degree:float, mode:str, seed=12345):
-    # Initialise a seed for reproductivity.
-    rng =  np.random.default_rng(seed)
-
-    # Dynamic changes mean sensors can move anywhere within the plane.
-    if mode == "DC":
-        n_change = int(change_degree*n_rewards)
-        n_same = n_rewards - n_change
-        # Some rewards remain the same.
-        rewards = rng.choice(rewards, n_same, replace=False)
-        # Others change randomly.
-        rewards = np.append(rewards, SampleFree(n_change, G.xL, G.xH, G.yL, G.yH, G, seed), axis=0)
-    # Changes with cable.
-    elif mode == "LC":
-        # Sensor moves in a circle with radius equal to cable length.
-        delta_x = rng.uniform(low=-change_degree, high=change_degree, size=n_rewards)
-        max_delta_y = np.sqrt(np.power(change_degree, 2) - np.power(delta_x, 2))
-        delta_y = rng.uniform(low=-max_delta_y, high=max_delta_y, size=n_rewards)
-
-        # Modify the latlong of the rewards.
-        rewards[:, 0] = anchored_latlongs[:, 0] + delta_x
-        rewards[:, 1] = anchored_latlongs[:, 1] + delta_y
-
-        # Wrap-around
-        rewards[:, 0] = np.where(rewards[:, 0] < G.xL, rewards[:, 0] + (G.xH - G.xL), rewards[:, 0])
-        rewards[:, 0] = np.where(rewards[:, 0] > G.xH, rewards[:, 0] - (G.xH - G.xL), rewards[:, 0])
-        rewards[:, 1] = np.where(rewards[:, 1] < G.yL, rewards[:, 1] + (G.yH - G.yL), rewards[:, 1])
-        rewards[:, 1] = np.where(rewards[:, 1] > G.yH, rewards[:, 1] - (G.yH - G.yL), rewards[:, 1])
-
-    # Update the simulated model.
-    # G.reset_reward(n_rewards)
-    # G.add_reward(rewards)
-
-    return G, rewards
-
-
-def remove_graph_rewards(G:Graph, acc_collected_rewards:list, rewards, n_rewards:int, fail_round:int):
-    # Get collected rewards index.
-    remove_idx = [i for i in range(len(acc_collected_rewards)) if acc_collected_rewards[i] == fail_round]
-
-    # Randomly select some rewards to be removed.
-    rewards[remove_idx] = np.nan
-
-    # Update the simulated model.
-    G.reset_reward(n_rewards)
-    G.add_reward(rewards)
-
-    return G, rewards
-
-
-def update_graph_model(G:Graph, rewards, rewards_real, estimated_collected_rewards:list, collected_rewards:list, n_rewards:int, change_type:str):
-    # Get collected rewards index.
-    idx = [i for i in range(len(collected_rewards)) if collected_rewards[i]]
-    # Check if reward is expected but not actually collected.
-    absent_idx = [i for i in range(len(estimated_collected_rewards)) if estimated_collected_rewards[i] and not collected_rewards[i]]
-
-    # Check flag.
-    flag = False
-
-    # Check if latlongs have changed or miscollect any rewards.
-    if not np.array_equal(rewards[idx], rewards_real[idx]) or len(absent_idx) > 0:
-        # Update latlongs of collected rewards.
-        # rewards[idx] = deepcopy(rewards_real[idx])
-        rewards = deepcopy(rewards)
-
-        # If miscollect any rewards, set latlongs to nan.
-        if change_type == "AC":
-            rewards[absent_idx] = np.nan
-
-        # Update the simulated model.
-        G.reset_reward(n_rewards)
-        G.add_reward(rewards)
-        flag = True
-
-    return G, rewards, flag
-
-
 # Modify the number of rewards.
 def modify_number_rewards(G: Graph, n_rewards:int, rewards, seed=0):
     # Delta between the desired number of rewards and the current.
@@ -232,7 +155,6 @@ def modify_number_rewards(G: Graph, n_rewards:int, rewards, seed=0):
     else:
         rng = np.random.default_rng(seed)
         rewards = rng.choice(rewards, n_rewards, replace=False)
-
     return rewards
 
 

@@ -92,11 +92,13 @@ class Central_InfoGathering_Agent(Central_Agent):
 
     def f_reward(self, edge_history):
         '''Global objective function.'''
-        return sum(self.Z.evaluate_traj_reward(edge_history))/self.n_rewards
+        # return sum(self.Z.evaluate_traj_reward(edge_history))/self.n_rewards
+        return self.Z.evaluate_traj_reward(edge_history)/self.n_rewards
 
     def f_score(self, edge_history):
         '''Global objective function.'''
-        return sum(self.Z.evaluate_traj_reward(self.f_joint(edge_history)))/self.n_rewards
+        # return sum(self.Z.evaluate_traj_reward(self.f_joint(edge_history)))/self.n_rewards
+        return self.Z.evaluate_traj_reward(self.f_joint(edge_history))/self.n_rewards
 
     def f_actions(self, edge_history):
         '''Available functions are listed of successor nodes.'''

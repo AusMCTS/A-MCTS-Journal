@@ -6,7 +6,6 @@ Author: Nhat Nguyen (School of Computer Science - University of Adelaide)
 
 
 from agent.Base_Agent import Base_Agent
-from agent.SwMCTS_Agent import SwMCTS_Agent
 from agent.DecMCTS_Agent import DecMCTS_Agent
 from agent.AMCTS_Agent import AMCTS_Agent, GreedyMCTS_Agent
 from algos.functions import random_choice_bias, evaluate_immediate_actions, f_joint
@@ -29,7 +28,8 @@ class InfoGathering_Agent(Base_Agent):
 
     def f_reward(self, edge_history):
         '''Global objective function.'''
-        return sum(self.Z.evaluate_traj_reward(edge_history))/self.n_rewards
+        # return sum(self.Z.evaluate_traj_reward(edge_history))/self.n_rewards
+        return self.Z.evaluate_traj_reward(edge_history)/self.n_rewards
 
     def f_score(self, edge_history):
         '''Utility is the joint reward minus other robots' reward.'''
@@ -51,13 +51,6 @@ class InfoGathering_Agent(Base_Agent):
     def update_belief(self):
         '''Method to update belief about the environment.'''
         pass
-
-
-class SW_InfoGathering_Agent(SwMCTS_Agent, InfoGathering_Agent):
-    '''Sw-MCTS agent for information gathering task.'''
-    def __init__(self, initial_state: float, initial_actions: list, initial_position: list, i: int, n_agents: int, max_window: int, c_p: float, budget: float, planning_time: float, N_components: int, N_com_every: int, Z: Graph, n_rewards:int, logger: logging = None):
-        super().__init__(initial_state, initial_actions, initial_position, i, n_agents, max_window, c_p, budget, planning_time, N_components, N_com_every, logger)
-        InfoGathering_Agent.set_belief(self, Z=Z, n_rewards=n_rewards)
 
 
 class Dec_InfoGathering_Agent(DecMCTS_Agent, InfoGathering_Agent):

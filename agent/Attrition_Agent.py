@@ -6,7 +6,7 @@ Author: Nhat Nguyen (School of Computer Science - University of Adelaide)
 
 
 from agent.Base_Agent import Base_Agent
-from agent.InfoGathering_Agent import A_InfoGathering_Agent, Dec_InfoGathering_Agent, SW_InfoGathering_Agent, Greedy_InfoGathering_Agent
+from agent.InfoGathering_Agent import A_InfoGathering_Agent, Dec_InfoGathering_Agent, Greedy_InfoGathering_Agent
 from envs.graph import Graph
 from algos.functions import f_joint
 from abc import abstractmethod
@@ -79,13 +79,6 @@ class Dec_AttritionGathering_Agent(Dec_InfoGathering_Agent, InfoGathering_Attrti
     '''Dec-MCTS agent for information gathering task with attrition risk.'''
     def __init__(self, initial_state: float, initial_actions: list, initial_position: list, i: int, n_agents: int, gamma: float, c_p: float, budget: float, planning_time: float, N_components: int, N_com_every: int, Z: Graph, n_rewards: int, logger: logging = None, fail_conidtion: any = None):
         super().__init__(initial_state, initial_actions, initial_position, i, n_agents, gamma, c_p, budget, planning_time, N_components, N_com_every, Z, n_rewards, logger)
-        InfoGathering_Attrtion_Agent.set_fail_condition(self, fail_conidtion=fail_conidtion)
-
-
-class SW_AttritioGathering_Agent(SW_InfoGathering_Agent, InfoGathering_Attrtion_Agent):
-    '''SW-MCTS agent for information gathering task with attrition risk.'''
-    def __init__(self, initial_state: float, initial_actions: list, initial_position: list, i: int, n_agents: int, max_window: int, c_p: float, budget: float, planning_time: float, N_components: int, N_com_every: int, Z: Graph, n_rewards: int, logger: logging = None, fail_conidtion: any = None):
-        super().__init__(initial_state, initial_actions, initial_position, i, n_agents, max_window, c_p, budget, planning_time, N_components, N_com_every, Z, n_rewards, logger)
         InfoGathering_Attrtion_Agent.set_fail_condition(self, fail_conidtion=fail_conidtion)
 
 
